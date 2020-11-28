@@ -17,8 +17,11 @@
             pkgs.cabal-install
             pkgs.cabal2nix
             pkgs.ghc
+            pkgs.zlib
           ];
         };
+
+        defaultPackage = pkgs.haskellPackages.callPackage ./nix/droste.nix {};
       }
     );
 }
