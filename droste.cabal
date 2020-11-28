@@ -30,10 +30,3 @@ executable droste
   build-depends:       base >=4.14 && <4.15, droste
   hs-source-dirs:      app
   default-language:    Haskell2010
-
-test-suite droste-test
-  default-language:    Haskell2010
-  type:                exitcode-stdio-1.0
-  hs-source-dirs:      tests
-  main-is:             MyLibTest.hs
-  build-depends:       base >=4.14 && <4.15
