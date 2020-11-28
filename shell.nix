@@ -1,1 +1,1 @@
-(import ./legacy-shim.nix).shellNix
+(import ./nix/legacy-shim.nix).shellNix
