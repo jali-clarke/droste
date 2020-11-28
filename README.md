@@ -5,3 +5,7 @@ A simple web service + frontend that allows one to easily create pictures with e
 ## How to run
 
 TBD, preferably `nix`
+
+## License
+
+[MIT](https://opensource.org/licenses/MIT)
