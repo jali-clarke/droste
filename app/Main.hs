@@ -1,20 +1,14 @@
 module Main where
 
-import Codec.Picture
+import Network.Wai.Handler.Warp
+import Servant
+import System.Environment
 
-import Shrinker
-
-fileName :: FilePath
-fileName = "test.png"
-
-rect :: Rectangle
-rect = mkTargetRectangle (989, 877) (989, 1344) (31, 1340) (28, 879)
+import Api
+import Server
 
 main :: IO ()
 main = do
-    maybeImage <- readImage fileName
-    case maybeImage of
-        Left err -> putStrLn err
-        Right dynamicImage ->
-            let drosteImage = dynamicPixelMap (shrink rect) dynamicImage
-            in savePngImage "test_droste.png" drosteImage
+    staticDir <- getEnv "STATIC_DIR"
+    serverPort <- getEnv "SERVER_PORT" >>= readIO
+    run serverPort (serve api (server staticDir))

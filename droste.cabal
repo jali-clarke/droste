@@ -16,22 +16,37 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 
 library
-  exposed-modules:     Shrinker
+  exposed-modules:
+    Api
+    Server
+  other-modules:
+    Models.DrosteRequest
+    Models.Rectangle
+    Models.StaticPath
+    Shrinker
   build-depends:
     base >=4.14 && <4.15
+    , aeson ==1.5.4.1
+    , bytestring ==0.10.10.0
+    , filepath ==1.4.2.1
     , JuicyPixels ==3.3.5
+    , mtl ==2.2.2
+    , servant-server ==0.18.2
+    , servant-multipart ==0.12
+    , utf8-string ==1.0.1.1
+    , uuid ==1.3.13
   hs-source-dirs:      lib
   ghc-options:         -Wall -Werror
   default-language:    Haskell2010
 
 executable droste
   main-is:             Main.hs
-  -- other-modules:
-  -- other-extensions:
   build-depends:
     base >=4.14 && <4.15
     , droste
-    , JuicyPixels ==3.3.5
+    , directory ==1.3.6.0
+    , servant-server ==0.18.2
+    , warp ==3.3.13
   hs-source-dirs:      app
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N -Wall -Werror -O2
   default-language:    Haskell2010
