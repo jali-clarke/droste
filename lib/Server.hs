@@ -17,6 +17,7 @@ import qualified Data.UUID.V4 as U
 import Servant
 import Servant.Multipart
 import System.FilePath
+import System.Directory
 
 import Api
 import Models.DrosteRequest
@@ -24,6 +25,9 @@ import Models.StaticPath
 import Shrinker
 
 type StaticCtx = ReaderT FilePath Handler
+
+staticRoot :: StaticCtx FilePath
+staticRoot = ask
 
 relativeToRoot :: FilePath -> StaticCtx FilePath
 relativeToRoot relPath = asks $ \root -> joinPath [root, relPath]
@@ -38,8 +42,14 @@ saveNewImage dynamicImage = do
 staticServer :: FilePath -> ServerT StaticApi StaticCtx
 staticServer root = serveDirectoryWebApp root
 
-uploadServer :: ServerT UploadApi StaticCtx
-uploadServer multipartData =
+uploadGetAllServer :: ServerT UploadGetAllApi StaticCtx
+uploadGetAllServer = do
+    root <- staticRoot
+    pathStrings <- liftIO $ listDirectory root
+    pure $ fmap StaticPath pathStrings
+
+uploadPostServer :: ServerT UploadPostApi StaticCtx
+uploadPostServer multipartData =
     let dataFiles = files multipartData
     in do
         when (length dataFiles /= 1) $
@@ -48,6 +58,9 @@ uploadServer multipartData =
             Left err -> throwError $ err400 {errBody = "uploaded file is not a valid image: " <> B.fromString err}
             Right dynamicImage -> pure dynamicImage
         saveNewImage dynamicImage
+
+uploadServer :: ServerT UploadApi StaticCtx
+uploadServer = uploadGetAllServer :<|> uploadPostServer
 
 drosteServer :: ServerT DrosteApi StaticCtx
 drosteServer drosteRequest =
