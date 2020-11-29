@@ -8,10 +8,10 @@ import Data.Aeson.Types
 import GHC.Generics
 
 import Models.Rectangle
-import Models.StaticPath
+import Models.Image
 
 data DrosteRequest = DrosteRequest {
-    staticPath :: StaticPath,
+    image :: Image,
     rectangle :: Rectangle
 } deriving Generic
 

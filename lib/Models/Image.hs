@@ -2,14 +2,14 @@
     DeriveGeneric
 #-}
 
-module Models.StaticPath where
+module Models.Image where
 
 import Data.Aeson.Types
 import GHC.Generics
 
-data StaticPath = StaticPath {
+data Image = Image {
     path :: String
 } deriving Generic
 
-instance FromJSON StaticPath
-instance ToJSON StaticPath
+instance FromJSON Image
+instance ToJSON Image

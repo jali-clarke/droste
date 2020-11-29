@@ -21,8 +21,8 @@ library
     Server
   other-modules:
     Models.DrosteRequest
+    Models.Image
     Models.Rectangle
-    Models.StaticPath
     Shrinker
   build-depends:
     base >=4.14 && <4.15
