@@ -7,10 +7,14 @@
   inputs.flake-compat.url = "github:edolstra/flake-compat";
   inputs.flake-compat.flake = false;
 
-  outputs = {self, nixpkgs, flake-utils, flake-compat}:
+  inputs.easy-purescript-nix.url = "github:justinwoo/easy-purescript-nix";
+  inputs.easy-purescript-nix.flake = false;
+
+  outputs = {self, nixpkgs, flake-utils, flake-compat, easy-purescript-nix}:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
+        purescript-pkgs = import easy-purescript-nix {inherit pkgs;};
       in {
         devShell = pkgs.mkShell {
           buildInputs = [
@@ -18,6 +22,10 @@
             pkgs.cabal2nix
             pkgs.ghc
             pkgs.zlib
+
+            purescript-pkgs.purescript
+            purescript-pkgs.spago
+            purescript-pkgs.spago2nix
           ];
         };
 
