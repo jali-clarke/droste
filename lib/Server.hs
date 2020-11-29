@@ -59,8 +59,16 @@ imagesPostServer multipartData =
             Right dynamicImage -> pure dynamicImage
         saveNewImage dynamicImage
 
+imagesDeleteServer :: String -> StaticCtx NoContent
+imagesDeleteServer relativePath = do
+    imagePath <- relativeToRoot relativePath
+    fileExists <- liftIO $ doesFileExist imagePath
+    when fileExists $ liftIO $
+        removeFile imagePath
+    pure NoContent
+
 imagesServer :: ServerT ImagesApi StaticCtx
-imagesServer = imagesGetAllServer :<|> imagesPostServer
+imagesServer = imagesGetAllServer :<|> imagesPostServer :<|> imagesDeleteServer
 
 drosteServer :: ServerT DrosteApi StaticCtx
 drosteServer drosteRequest =
