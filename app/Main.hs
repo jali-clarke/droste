@@ -9,9 +9,6 @@ import System.Environment
 import Api
 import Server
 
--- rect :: Rectangle
--- rect = mkTargetRectangle (1057, 1054) (1929, 1054) (1929, 1926) (1057, 1926)
-
 main :: IO ()
 main = do
     staticDir <- getEnv "STATIC_DIR"
