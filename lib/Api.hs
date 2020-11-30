@@ -18,8 +18,9 @@ type ImagesPostApi = MultipartForm Mem (MultipartData Mem) :> Post '[JSON] Image
 type ImagesDeleteApi = Capture "relativePath" String :> DeleteNoContent
 type ImagesApi = "images" :> (ImagesGetAllApi :<|> ImagesPostApi :<|> ImagesDeleteApi)
 type DrosteApi = "droste" :> ReqBody '[JSON] DrosteRequest :> Post '[JSON] Image
+type AssetsApi = RawM
 
-type Api = StaticApi :<|> ImagesApi :<|> DrosteApi
+type Api = StaticApi :<|> ImagesApi :<|> DrosteApi :<|> AssetsApi
 
 api :: Proxy Api
 api = Proxy

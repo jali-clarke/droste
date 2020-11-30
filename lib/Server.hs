@@ -7,6 +7,8 @@ module Server (
     server
 ) where
 
+import Paths_droste
+
 import Codec.Picture hiding (Image)
 import Control.Monad
 import Control.Monad.Reader
@@ -83,5 +85,8 @@ drosteServer drosteRequest =
             Right newImage -> pure $ dynamicPixelMap (shrink transformRect) newImage
         saveNewImage shrunkImage
 
+assetsServer :: ServerT AssetsApi StaticCtx
+assetsServer = liftIO getDataDir >>= RawM.serveDirectoryWebApp
+
 server :: FilePath -> Server Api
-server root = hoistServer api (flip runReaderT root) (staticServer :<|> imagesServer :<|> drosteServer)
+server root = hoistServer api (flip runReaderT root) (staticServer :<|> imagesServer :<|> drosteServer :<|> assetsServer)

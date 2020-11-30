@@ -14,12 +14,16 @@ maintainer:          jinnah.ali-clarke@outlook.com
 -- category:
 build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
+data-dir:            data
+data-files:
+  *.html
 
 library
   exposed-modules:
     Api
     Server
   other-modules:
+    Paths_droste
     Models.DrosteRequest
     Models.Image
     Models.Rectangle
