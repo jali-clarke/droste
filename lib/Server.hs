@@ -16,6 +16,7 @@ import qualified Data.UUID as U
 import qualified Data.UUID.V4 as U
 import Servant
 import Servant.Multipart
+import qualified Servant.RawM.Server as RawM
 import System.FilePath
 import System.Directory
 
@@ -39,8 +40,8 @@ saveNewImage dynamicImage = do
     liftIO $ savePngImage newPath dynamicImage
     pure $ Image newFilename
 
-staticServer :: FilePath -> ServerT StaticApi StaticCtx
-staticServer root = serveDirectoryWebApp root
+staticServer :: ServerT StaticApi StaticCtx
+staticServer = staticRoot >>= RawM.serveDirectoryWebApp
 
 imagesGetAllServer :: ServerT ImagesGetAllApi StaticCtx
 imagesGetAllServer = do
@@ -83,4 +84,4 @@ drosteServer drosteRequest =
         saveNewImage shrunkImage
 
 server :: FilePath -> Server Api
-server root = hoistServer api (flip runReaderT root) (staticServer root :<|> imagesServer :<|> drosteServer)
+server root = hoistServer api (flip runReaderT root) (staticServer :<|> imagesServer :<|> drosteServer)

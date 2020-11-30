@@ -7,11 +7,12 @@ module Api where
 
 import Servant
 import Servant.Multipart
+import Servant.RawM.Server
 
 import Models.Image
 import Models.DrosteRequest
 
-type StaticApi = "static" :> Raw
+type StaticApi = "static" :> RawM
 type ImagesGetAllApi = Get '[JSON] [Image]
 type ImagesPostApi = MultipartForm Mem (MultipartData Mem) :> Post '[JSON] Image
 type ImagesDeleteApi = Capture "relativePath" String :> DeleteNoContent

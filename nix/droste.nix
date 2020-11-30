@@ -1,6 +1,6 @@
 { mkDerivation, aeson, base, bytestring, directory, filepath
-, JuicyPixels, mtl, servant-multipart, servant-server, stdenv
-, utf8-string, uuid, wai-logger, warp
+, JuicyPixels, mtl, servant-multipart, servant-rawm-server
+, servant-server, stdenv, utf8-string, uuid, wai-logger, warp
 }:
 mkDerivation {
   pname = "droste";
@@ -10,7 +10,8 @@ mkDerivation {
   isExecutable = true;
   libraryHaskellDepends = [
     aeson base bytestring directory filepath JuicyPixels mtl
-    servant-multipart servant-server utf8-string uuid
+    servant-multipart servant-rawm-server servant-server utf8-string
+    uuid
   ];
   executableHaskellDepends = [
     base directory servant-server wai-logger warp
