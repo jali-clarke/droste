@@ -85,11 +85,17 @@ drosteServer drosteRequest =
             Right newImage -> pure $ dynamicPixelMap (shrink transformRect) newImage
         saveNewImage shrunkImage
 
+programmaticServer :: ServerT ProgrammaticApi StaticCtx
+programmaticServer = imagesServer :<|> drosteServer
+
 landingServer :: ServerT LandingApi StaticCtx
 landingServer = pure $ addHeader "/index.html" NoContent
 
 assetsServer :: ServerT AssetsApi StaticCtx
 assetsServer = liftIO getDataDir >>= RawM.serveDirectoryWebApp
 
+clientAssetsServer :: ServerT ClientAssetsApi StaticCtx
+clientAssetsServer = landingServer :<|> assetsServer
+
 server :: FilePath -> Server Api
-server root = hoistServer api (flip runReaderT root) (staticServer :<|> imagesServer :<|> drosteServer :<|> landingServer :<|> assetsServer)
+server root = hoistServer api (flip runReaderT root) (staticServer :<|> programmaticServer :<|> clientAssetsServer)
