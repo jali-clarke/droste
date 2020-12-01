@@ -65,20 +65,19 @@ boardClass =
         Just val -> pure val
       pure $ React.createLeafElement squareClass {value: squareValue, onClick: handleClick this n}
 
-    status = "Next player: X"
     render this = do
       state <- React.getState this
       firstRow <- traverse (mkSquare this) [0, 1, 2]
       secondRow <- traverse (mkSquare this) [3, 4, 5]
       thirdRow <- traverse (mkSquare this) [6, 7, 8]
       pure $ React.DOM.div' [
-        React.DOM.div [Props.className "status"] [React.DOM.text status],
+        React.DOM.div [Props.className "status"] [React.DOM.text $ "Next player: " <> show state.nextPlayer],
         React.DOM.div [Props.className "board-row"] firstRow,
         React.DOM.div [Props.className "board-row"] secondRow,
         React.DOM.div [Props.className "board-row"] thirdRow
       ]
 
-    component this = pure {state: {squareState: replicate 9 None}, render: render this}
+    component this = pure {state: {squareState: replicate 9 None, nextPlayer: X}, render: render this}
   in React.component "Board" component
 
 gameClass :: React.ReactClass {}
