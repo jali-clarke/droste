@@ -43,7 +43,7 @@ saveNewImage dynamicImage = do
     pure $ Image newFilename
 
 staticServer :: ServerT StaticApi StaticCtx
-staticServer = staticRoot >>= RawM.serveDirectoryWebApp
+staticServer = staticRoot >>= RawM.serveDirectoryFileServer
 
 imagesGetAllServer :: ServerT ImagesGetAllApi StaticCtx
 imagesGetAllServer = do
@@ -92,7 +92,7 @@ landingServer :: ServerT LandingApi StaticCtx
 landingServer = pure $ addHeader "/index.html" NoContent
 
 assetsServer :: ServerT AssetsApi StaticCtx
-assetsServer = liftIO getDataDir >>= RawM.serveDirectoryWebApp
+assetsServer = liftIO getDataDir >>= RawM.serveDirectoryFileServer
 
 clientAssetsServer :: ServerT ClientAssetsApi StaticCtx
 clientAssetsServer = landingServer :<|> assetsServer
