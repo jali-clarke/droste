@@ -1,6 +1,6 @@
 module Main where
 
-import Prelude (Unit, bind, pure, unit, void, ($))
+import Prelude (Unit, bind, pure, show, unit, void, ($))
 
 import Data.Maybe
 
@@ -11,73 +11,67 @@ import Web.HTML.Window (document) as DOM
 
 import React as React
 import React.DOM as React.DOM
+import React.DOM.Props as Props
 import ReactDOM as ReactDOM
 
 import Effect (Effect)
 
--- class Square extends React.Component {
---   render() {
---     return (
---       <button className="square">
---         {/* TODO */}
---       </button>
---     );
---   }
--- }
+squareClass :: React.ReactClass {value :: Int}
+squareClass =
+  let
+    render this = do
+      props <- React.getProps this
+      pure $ React.DOM.button [Props.className "square"] [
+        React.DOM.text (show props.value)
+      ]
+    component this = pure {state: {}, render: render this}
+  in React.component "Square" component
 
--- class Board extends React.Component {
---   renderSquare(i) {
---     return <Square />;
---   }
+boardClass :: React.ReactClass {}
+boardClass =
+  let
+    renderSquare n = React.createLeafElement squareClass {value: n}
 
---   render() {
---     const status = 'Next player: X';
+    status = "Next player: X"
+    render = pure $
+      React.DOM.div' [
+        React.DOM.div [Props.className "status"] [React.DOM.text status],
+        React.DOM.div [Props.className "board-row"] [
+          renderSquare(0),
+          renderSquare(1),
+          renderSquare(2)
+        ],
+        React.DOM.div [Props.className "board-row"] [
+          renderSquare(3),
+          renderSquare(4),
+          renderSquare(5)
+        ],
+        React.DOM.div [Props.className "board-row"] [
+          renderSquare(6),
+          renderSquare(7),
+          renderSquare(8)
+        ]
+      ]
 
---     return (
---       <div>
---         <div className="status">{status}</div>
---         <div className="board-row">
---           {this.renderSquare(0)}
---           {this.renderSquare(1)}
---           {this.renderSquare(2)}
---         </div>
---         <div className="board-row">
---           {this.renderSquare(3)}
---           {this.renderSquare(4)}
---           {this.renderSquare(5)}
---         </div>
---         <div className="board-row">
---           {this.renderSquare(6)}
---           {this.renderSquare(7)}
---           {this.renderSquare(8)}
---         </div>
---       </div>
---     );
---   }
--- }
+    component this = pure {state: {}, render: render}
+  in React.component "Board" component
 
--- class Game extends React.Component {
---   render() {
---     return (
---       <div className="game">
---         <div className="game-board">
---           <Board />
---         </div>
---         <div className="game-info">
---           <div>{/* status */}</div>
---           <ol>{/* TODO */}</ol>
---         </div>
---       </div>
---     );
---   }
--- }
+gameClass :: React.ReactClass {}
+gameClass =
+  let
+    render = pure $
+      React.DOM.div [Props.className "game"] [
+        React.DOM.div [Props.className "game-board"] [
+          React.createLeafElement boardClass {}
+        ],
+        React.DOM.div [Props.className "game-info"] [
+          React.DOM.div' [],
+          React.DOM.ol' []
+        ]
+      ]
 
--- // ========================================
-
-asdfClass :: React.ReactClass {}
-asdfClass =
-  let component this = pure {state: {}, render: (pure $ React.DOM.text "asdf")}
-  in React.component "Asdf" component
+    component this = pure {state: {}, render: render}
+  in React.component "Game" component
 
 main :: Effect Unit
 main = do
@@ -86,4 +80,4 @@ main = do
   maybeAppElement <- DOM.getElementById "app" (DOM.toNonElementParentNode document)
   case maybeAppElement of
     Nothing -> pure unit
-    Just appElement -> void $ ReactDOM.render (React.createLeafElement asdfClass {}) appElement
+    Just appElement -> void $ ReactDOM.render (React.createLeafElement gameClass {}) appElement
