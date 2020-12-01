@@ -1,13 +1,13 @@
 module Main where
 
-import Prelude (Unit, bind, pure, show, unit, void, ($))
+import Prelude (Unit, bind, pure, show, unit, void, ($), (<>))
 
 import Data.Maybe
 
 import Web.HTML.HTMLDocument (toNonElementParentNode) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
 import Web.HTML (window) as DOM
-import Web.HTML.Window (document) as DOM
+import Web.HTML.Window (alert, document) as DOM
 
 import React as React
 import React.DOM as React.DOM
@@ -19,9 +19,14 @@ import Effect (Effect)
 squareClass :: React.ReactClass {value :: Int}
 squareClass =
   let
+    onClick this event = do
+      props <- React.getProps this
+      window <- DOM.window
+      DOM.alert ("i am square " <> show props.value) window
+
     render this = do
       props <- React.getProps this
-      pure $ React.DOM.button [Props.className "square"] [
+      pure $ React.DOM.button [Props.className "square", Props.onClick (onClick this)] [
         React.DOM.text (show props.value)
       ]
     component this = pure {state: {}, render: render this}
