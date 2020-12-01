@@ -1,1 +1,1 @@
-(import ./nix/legacy-shim.nix).defaultNix
+(import ./legacy-shim.nix).defaultNix

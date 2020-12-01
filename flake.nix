@@ -19,6 +19,8 @@
         pkgs = nixpkgs.legacyPackages.${system};
         purescript-pkgs = import easy-purescript-nix {inherit pkgs;};
         spago2nix-pkg = import spago2nix {inherit pkgs;};
+
+        droste = pkgs.haskellPackages.callPackage ./cabal-packages.nix {};
       in {
         devShell = pkgs.mkShell {
           buildInputs = [
@@ -33,7 +35,7 @@
           ];
         };
 
-        defaultPackage = pkgs.haskellPackages.callPackage ./nix/droste.nix {};
+        defaultPackage = droste;
       }
     );
 }
