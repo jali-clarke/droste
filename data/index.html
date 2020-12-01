@@ -8,10 +8,22 @@
 </head>
 
 <body>
-
-  <p>Hello, world!</p>
-
-  <script src="index.js"></script>
+  <div id="app"></div>
+  <script src="https://requirejs.org/docs/release/2.3.6/minified/require.js"></script>
+  <script>
+    require.config({
+      paths: {
+        "react": "https://unpkg.com/react@17/umd/react.production.min",
+        "react-dom": "https://unpkg.com/react-dom@17/umd/react-dom.production.min",
+        "main": "/index"
+      }
+    });
+    require(["react", "react-dom"], function(React, ReactDOM) {
+      require(["main"], function(main){
+        console.log("loaded");
+      });
+    });
+  </script>
 </body>
 
 </html>

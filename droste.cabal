@@ -16,6 +16,7 @@ build-type:          Simple
 extra-source-files:  CHANGELOG.md, README.md
 data-dir:            data
 data-files:
+  index.css
   index.html
   index.js
 
