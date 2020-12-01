@@ -20,16 +20,19 @@ squareClass :: React.ReactClass {value :: Int}
 squareClass =
   let
     onClick this event = do
-      props <- React.getProps this
+      state <- React.getState this
       window <- DOM.window
-      DOM.alert ("i am square " <> show props.value) window
+      DOM.alert ("i am square " <> show state.value) window
 
     render this = do
-      props <- React.getProps this
+      state <- React.getState this
       pure $ React.DOM.button [Props.className "square", Props.onClick (onClick this)] [
-        React.DOM.text (show props.value)
+        React.DOM.text (show state.value)
       ]
-    component this = pure {state: {}, render: render this}
+
+    component this = do
+      props <- React.getProps this
+      pure {state: {value: props.value}, render: render this}
   in React.component "Square" component
 
 boardClass :: React.ReactClass {}
