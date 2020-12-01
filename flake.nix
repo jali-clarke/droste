@@ -23,7 +23,7 @@
         spago = purescript-pkgs.spago;
         spago2nix-pkg = import spago2nix {inherit pkgs;};
 
-        droste-frontend = import ./droste-frontend {inherit pkgs purs;};
+        droste-frontend = import ./droste-frontend {inherit pkgs purs spago;};
         droste = (pkgs.haskellPackages.callPackage ./cabal-packages.nix {}).overrideAttrs (oldAttrs: rec {
           preBuild = ''
             ${if builtins.hasAttr "preBuild" oldAttrs then oldAttrs.preBuild else ""}
