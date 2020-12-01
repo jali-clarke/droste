@@ -2,11 +2,11 @@ module Main where
 
 import Prelude (Unit, bind, discard, pure, unit, void, ($), (<>))
 
-import Data.Array (slice, (!!))
+import Data.Array (updateAt, (!!))
 import Data.Maybe
 import Data.Show (class Show, show)
 import Data.Traversable (traverse)
-import Data.Unfoldable (replicateA)
+import Data.Unfoldable (replicate)
 
 import Web.HTML.HTMLDocument (toNonElementParentNode) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
@@ -21,7 +21,6 @@ import ReactDOM as ReactDOM
 
 import Effect (Effect)
 import Effect.Console (log)
-import Effect.Ref (new, read, write) as Ref
 
 data SquareValue = X | O | None
 
@@ -53,11 +52,9 @@ boardClass =
   let
     handleClick this n event = do
       state <- React.getState this
-      case state.squareState !! n of
+      case updateAt n X state.squareState of
         Nothing -> log $ "failed to handle click for out-of-bounds square " <> show n
-        Just ref -> Ref.write X ref
-      let squareState' = slice 0 9 state.squareState
-      React.setState this {squareState: squareState'}
+        Just newState -> React.setState this {squareState: newState}
 
     mkSquare this n = do
       state <- React.getState this
@@ -65,7 +62,7 @@ boardClass =
         Nothing -> do
           log $ "failed to get state for out-of-bounds square " <> show n
           pure None
-        Just ref -> Ref.read ref
+        Just val -> pure val
       pure $ React.createLeafElement squareClass {value: squareValue, onClick: handleClick this n}
 
     status = "Next player: X"
@@ -81,9 +78,7 @@ boardClass =
         React.DOM.div [Props.className "board-row"] thirdRow
       ]
 
-    component this = do
-      gameArray <- replicateA 9 (Ref.new None)
-      pure {state: {squareState: gameArray}, render: render this}
+    component this = pure {state: {squareState: replicate 9 None}, render: render this}
   in React.component "Board" component
 
 gameClass :: React.ReactClass {}
