@@ -10,16 +10,17 @@ import Models.Rectangle
 interpolate1D :: Int -> Int -> Double -> Int
 interpolate1D start end t = round $ fromIntegral start + (fromIntegral $ end - start) * t
 
-interpolate2D :: (Int, Int) -> (Int, Int) -> Double -> (Int, Int)
-interpolate2D (xStart, yStart) (xEnd, yEnd) t = (interpolate1D xStart xEnd t, interpolate1D yStart yEnd t)
+interpolate2D :: Point -> Point -> Double -> Point
+interpolate2D (Point xStart yStart) (Point xEnd yEnd) t =
+    Point (interpolate1D xStart xEnd t) (interpolate1D yStart yEnd t)
 
-shrinkMap :: Image px -> Rectangle -> (Int, Int) -> (Int, Int)
+shrinkMap :: Image px -> Rectangle -> Point -> Point
 shrinkMap image rect =
     let maxX = fromIntegral $ imageWidth image - 1
         maxY = fromIntegral $ imageHeight image - 1
-    in \(x, y) ->
-        let scaledX = fromIntegral x / maxX
-            scaledY = fromIntegral y / maxY
+    in \(Point xToMap yToMap) ->
+        let scaledX = fromIntegral xToMap / maxX
+            scaledY = fromIntegral yToMap / maxY
             topEdgeInterpolated = interpolate2D (topLeft rect) (topRight rect) scaledX
             bottomEdgeInterpolated = interpolate2D (bottomLeft rect) (bottomRight rect) scaledX
         in interpolate2D topEdgeInterpolated bottomEdgeInterpolated scaledY
@@ -28,8 +29,8 @@ shrink :: Pixel px => Rectangle -> Image px -> Image px
 shrink rect image =
     let mapping = shrinkMap image rect
 
-        folding mutableImage action x y px =
-            let (x', y') = mapping (x, y)
+        folding mutableImage action xToMap yToMap px =
+            let (Point x' y') = mapping (Point xToMap yToMap)
             in action *> (writePixel mutableImage x' y' px)
     in runST $ do
         mutableImage <- thawImage image
