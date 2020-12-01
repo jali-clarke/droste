@@ -50,11 +50,16 @@ squareClass =
 boardClass :: React.ReactClass {}
 boardClass =
   let
+    chooseNextPlayer squareValue =
+      case squareValue of
+        X -> O
+        _ -> X
+
     handleClick this n event = do
       state <- React.getState this
-      case updateAt n X state.squareState of
+      case updateAt n state.nextPlayer state.squareState of
         Nothing -> log $ "failed to handle click for out-of-bounds square " <> show n
-        Just newState -> React.setState this {squareState: newState}
+        Just newState -> React.setState this {squareState: newState, nextPlayer: chooseNextPlayer state.nextPlayer}
 
     mkSquare this n = do
       state <- React.getState this
