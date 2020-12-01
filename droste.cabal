@@ -19,6 +19,7 @@ data-files:
   index.css
   index.html
   index.js
+  favicon.ico
 
 library
   exposed-modules:
