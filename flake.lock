@@ -67,7 +67,24 @@
         "easy-purescript-nix": "easy-purescript-nix",
         "flake-compat": "flake-compat",
         "flake-utils": "flake-utils",
-        "nixpkgs": "nixpkgs"
+        "nixpkgs": "nixpkgs",
+        "spago2nix": "spago2nix"
+      }
+    },
+    "spago2nix": {
+      "flake": false,
+      "locked": {
+        "lastModified": 1602604874,
+        "narHash": "sha256-uIVlFzsayjCr7tBpx+ROTavPO0Rl63u3caJIGhsN68U=",
+        "owner": "justinwoo",
+        "repo": "spago2nix",
+        "rev": "898798204fa8f53837bbcf71e30aeb425deb0906",
+        "type": "github"
+      },
+      "original": {
+        "owner": "justinwoo",
+        "repo": "spago2nix",
+        "type": "github"
       }
     }
   },

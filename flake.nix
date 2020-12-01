@@ -10,11 +10,15 @@
   inputs.easy-purescript-nix.url = "github:justinwoo/easy-purescript-nix";
   inputs.easy-purescript-nix.flake = false;
 
-  outputs = {self, nixpkgs, flake-utils, flake-compat, easy-purescript-nix}:
+  inputs.spago2nix.url = "github:justinwoo/spago2nix";
+  inputs.spago2nix.flake = false;
+
+  outputs = {self, nixpkgs, flake-utils, flake-compat, easy-purescript-nix, spago2nix}:
     flake-utils.lib.eachDefaultSystem (system:
       let
         pkgs = nixpkgs.legacyPackages.${system};
         purescript-pkgs = import easy-purescript-nix {inherit pkgs;};
+        spago2nix-pkg = import spago2nix {inherit pkgs;};
       in {
         devShell = pkgs.mkShell {
           buildInputs = [
@@ -25,7 +29,7 @@
 
             purescript-pkgs.purescript
             purescript-pkgs.spago
-            purescript-pkgs.spago2nix
+            spago2nix-pkg
           ];
         };
 
