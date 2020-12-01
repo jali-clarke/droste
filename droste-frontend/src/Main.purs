@@ -1,13 +1,13 @@
 module Main where
 
-import Prelude (Unit, bind, pure, show, unit, void, ($), (<>))
+import Prelude (Unit, bind, pure, unit, void, ($))
 
 import Data.Maybe
 
 import Web.HTML.HTMLDocument (toNonElementParentNode) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
 import Web.HTML (window) as DOM
-import Web.HTML.Window (alert, document) as DOM
+import Web.HTML.Window (document) as DOM
 
 import React as React
 import React.DOM as React.DOM
@@ -16,29 +16,27 @@ import ReactDOM as ReactDOM
 
 import Effect (Effect)
 
-squareClass :: React.ReactClass {value :: Int}
+squareClass :: React.ReactClass {}
 squareClass =
   let
     onClick this event = do
       state <- React.getState this
-      window <- DOM.window
-      DOM.alert ("i am square " <> show state.value) window
+      React.setState this {value: Just "X"}
 
     render this = do
       state <- React.getState this
+      let value = maybe "" (\str -> str) state.value
       pure $ React.DOM.button [Props.className "square", Props.onClick (onClick this)] [
-        React.DOM.text (show state.value)
+        React.DOM.text value
       ]
 
-    component this = do
-      props <- React.getProps this
-      pure {state: {value: props.value}, render: render this}
+    component this = pure {state: {value: Nothing}, render: render this}
   in React.component "Square" component
 
 boardClass :: React.ReactClass {}
 boardClass =
   let
-    renderSquare n = React.createLeafElement squareClass {value: n}
+    renderSquare n = React.createLeafElement squareClass {}
 
     status = "Next player: X"
     render = pure $
