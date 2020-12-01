@@ -8,6 +8,7 @@ mkDerivation {
   src = ../.;
   isLibrary = true;
   isExecutable = true;
+  enableSeparateDataOutput = true;
   libraryHaskellDepends = [
     aeson base bytestring directory filepath JuicyPixels mtl
     servant-multipart servant-rawm-server servant-server utf8-string
