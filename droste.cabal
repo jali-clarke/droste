@@ -17,6 +17,7 @@ extra-source-files:  CHANGELOG.md, README.md
 data-dir:            data
 data-files:
   index.html
+  index.js
 
 library
   exposed-modules:

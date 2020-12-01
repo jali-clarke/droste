@@ -18,9 +18,18 @@
       let
         pkgs = nixpkgs.legacyPackages.${system};
         purescript-pkgs = import easy-purescript-nix {inherit pkgs;};
+
+        purs = purescript-pkgs.purescript;
+        spago = purescript-pkgs.spago;
         spago2nix-pkg = import spago2nix {inherit pkgs;};
 
-        droste = pkgs.haskellPackages.callPackage ./cabal-packages.nix {};
+        droste-frontend = import ./droste-frontend {inherit pkgs purs;};
+        droste = (pkgs.haskellPackages.callPackage ./cabal-packages.nix {}).overrideAttrs (oldAttrs: rec {
+          preBuild = ''
+            ${if builtins.hasAttr "preBuild" oldAttrs then oldAttrs.preBuild else ""}
+            cp ${droste-frontend}/index.js data/index.js
+          '';
+        });
       in {
         devShell = pkgs.mkShell {
           buildInputs = [
@@ -29,8 +38,8 @@
             pkgs.ghc
             pkgs.zlib
 
-            purescript-pkgs.purescript
-            purescript-pkgs.spago
+            purs
+            spago
             spago2nix-pkg
           ];
         };
