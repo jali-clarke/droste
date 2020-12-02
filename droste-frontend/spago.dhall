@@ -4,7 +4,8 @@ You can edit this file as you like.
 -}
 { name = "droste-frontend"
 , dependencies = [
-  "foreign-generic"
+  "affjax"
+  , "foreign-generic"
   , "psci-support"
   , "react"
   , "react-dom"

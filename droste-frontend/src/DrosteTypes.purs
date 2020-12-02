@@ -1,9 +1,4 @@
-module DrosteTypes (
-    DrosteRequest,
-    Image,
-    Point,
-    Rectangle
-) where
+module DrosteTypes where
 
 import Prelude
 
@@ -76,5 +71,3 @@ instance decodeDrosteRequest :: Decode DrosteRequest where
 
 instance encodeDrosteRequest :: Encode DrosteRequest where
     encode = genericEncode $ defaultOptions { unwrapSingleConstructors = true }
-
-
