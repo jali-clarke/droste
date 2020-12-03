@@ -25,12 +25,12 @@ import Effect.Class.Console (log)
 import DrosteApi (getImages)
 import DrosteTypes (Image(..))
 
-imageListElementClass :: React.ReactClass {image :: Image}
+imageListElementClass :: React.ReactClass {image :: Image, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListElementClass =
     let render props =
             let Image {path: imagePath} = props.image
             in React.DOM.li' [
-                React.DOM.button [Props.className "imageButton"] [
+                React.DOM.button [Props.className "imageButton", Props.onClick props.onClick] [
                     React.DOM.text imagePath
                 ],
                 React.DOM.img [
@@ -40,16 +40,16 @@ imageListElementClass =
             ]
     in React.statelessComponent render
 
-imageListClass :: React.ReactClass {images :: Array Image, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
+imageListClass :: React.ReactClass {images :: Array Image, refreshOnClick :: Event.SyntheticMouseEvent -> Effect Unit, imageSelectOnClick :: Image -> Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
-    let mkImageListElement image = React.createLeafElement imageListElementClass {image: image}
+    let mkImageListElement onClickConstructor image = React.createLeafElement imageListElementClass {image: image, onClick: onClickConstructor image}
 
         render props = React.DOM.div' [
-            React.DOM.button [Props.onClick props.onClick] [
+            React.DOM.button [Props.onClick props.refreshOnClick] [
                 React.DOM.text "refresh"
             ],
             React.DOM.text "Images",
-            React.DOM.ul' (map mkImageListElement props.images)
+            React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) props.images)
         ]
     in React.statelessComponent render
 
@@ -72,12 +72,17 @@ appClass =
                 Left err -> log $ "error when getting images: " <> err
                 Right images -> liftEffect $ React.setState this {images: images}
 
+        setSelectedImage this image = do
+            state <- React.getState this
+            React.setState this {selectedImage: Just image}
+
         render this = do
             state <- React.getState this
             pure $ React.DOM.div' $ catMaybes [
                 Just $ React.createLeafElement imageListClass {
                     images: state.images,
-                    onClick: (\_ -> refreshImageList this)
+                    refreshOnClick: (\_ -> refreshImageList this),
+                    imageSelectOnClick: (\image event -> setSelectedImage this image)
                 },
                 map (\image -> React.createLeafElement imageViewportClass {image: image}) state.selectedImage
             ]
