@@ -1,9 +1,9 @@
 module Main where
 
-import Prelude (Unit, bind, discard, map, pure, unit, void, ($), (<>))
+import Prelude (Unit, bind, map, pure, unit, void, ($), (<>))
 
 import Data.Either
-import Data.Maybe
+import Data.Maybe (Maybe(..))
 
 import Web.HTML.HTMLDocument (toNonElementParentNode) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
@@ -21,8 +21,8 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 
-import DrosteApi
-import DrosteTypes
+import DrosteApi (getImages)
+import DrosteTypes (Image(..))
 
 imageListElementClass :: React.ReactClass {image :: Image}
 imageListElementClass =
@@ -37,10 +37,14 @@ imageListElementClass =
             ]
     in React.statelessComponent render
 
-imageListClass :: React.ReactClass {images :: Array Image}
+imageListClass :: React.ReactClass {images :: Array Image, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
     let mkImageListElement image = React.createLeafElement imageListElementClass {image: image}
+
         render props = React.DOM.div' [
+            React.DOM.button [Props.onClick props.onClick] [
+                React.DOM.text "refresh"
+            ],
             React.DOM.text "Images",
             React.DOM.ul' (map mkImageListElement props.images)
         ]
@@ -48,24 +52,25 @@ imageListClass =
 
 appClass :: React.ReactClass {}
 appClass =
-    let render this = do
-            state <- React.getState this
-            pure $ React.DOM.div' [
-                React.createLeafElement imageListClass {
-                    images: state.images
-                }
-            ]
-
-        componentDidMount this = launchAff_ $ do
+    let refreshImageList this = launchAff_ $ do
             maybeImages <- getImages
             case maybeImages of
                 Left err -> log $ "error when getting images: " <> err
                 Right images -> liftEffect $ React.setState this {images: images}
 
+        render this = do
+            state <- React.getState this
+            pure $ React.DOM.div' [
+                React.createLeafElement imageListClass {
+                    images: state.images,
+                    onClick: (\_ -> refreshImageList this)
+                }
+            ]
+
         component this = pure {
             state: {images: []},
             render: render this,
-            componentDidMount: componentDidMount this
+            componentDidMount: refreshImageList this
         }
     in React.component "App" component
 
