@@ -29,7 +29,9 @@ imageListElementClass =
     let render props =
             let Image {path: imagePath} = props.image
             in React.DOM.li' [
-                React.DOM.text imagePath,
+                React.DOM.button [Props.className "imageButton"] [
+                    React.DOM.text imagePath
+                ],
                 React.DOM.img [
                     Props.src $ "/static/" <> imagePath,
                     Props.className "thumbnail"
