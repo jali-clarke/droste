@@ -2,6 +2,7 @@ module Main where
 
 import Prelude (Unit, bind, map, pure, unit, void, ($), (<>))
 
+import Data.Array (catMaybes)
 import Data.Either
 import Data.Maybe (Maybe(..))
 
@@ -52,6 +53,17 @@ imageListClass =
         ]
     in React.statelessComponent render
 
+imageViewportClass :: React.ReactClass {image :: Image}
+imageViewportClass =
+    let render props =
+            let Image {path: imagePath} = props.image
+            in React.DOM.div' [
+                React.DOM.img [
+                    Props.src $ "/static/" <> imagePath
+                ]
+            ]
+    in React.statelessComponent render
+
 appClass :: React.ReactClass {}
 appClass =
     let refreshImageList this = launchAff_ $ do
@@ -62,15 +74,16 @@ appClass =
 
         render this = do
             state <- React.getState this
-            pure $ React.DOM.div' [
-                React.createLeafElement imageListClass {
+            pure $ React.DOM.div' $ catMaybes [
+                Just $ React.createLeafElement imageListClass {
                     images: state.images,
                     onClick: (\_ -> refreshImageList this)
-                }
+                },
+                map (\image -> React.createLeafElement imageViewportClass {image: image}) state.selectedImage
             ]
 
         component this = pure {
-            state: {images: []},
+            state: {images: [], selectedImage: Nothing},
             render: render this,
             componentDidMount: refreshImageList this
         }
