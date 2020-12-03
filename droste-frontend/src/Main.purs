@@ -40,18 +40,33 @@ imageListElementClass =
             ]
     in React.statelessComponent render
 
-imageListClass :: React.ReactClass {images :: Array Image, refreshOnClick :: Event.SyntheticMouseEvent -> Effect Unit, imageSelectOnClick :: Image -> Event.SyntheticMouseEvent -> Effect Unit}
+imageListClass :: React.ReactClass {imageSelectOnClick :: Image -> Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
     let mkImageListElement onClickConstructor image = React.createLeafElement imageListElementClass {image: image, onClick: onClickConstructor image}
 
-        render props = React.DOM.div' [
-            React.DOM.button [Props.onClick props.refreshOnClick] [
-                React.DOM.text "refresh"
-            ],
-            React.DOM.text "Images",
-            React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) props.images)
-        ]
-    in React.statelessComponent render
+        refreshImageList this = launchAff_ $ do
+            maybeImages <- getImages
+            case maybeImages of
+                Left err -> log $ "error when getting images: " <> err
+                Right images -> liftEffect $ React.setState this {images: images}
+
+        render this = do
+            props <- React.getProps this
+            state <- React.getState this
+            pure $ React.DOM.div' [
+                React.DOM.button [Props.onClick $ (\_ -> refreshImageList this)] [
+                    React.DOM.text "refresh"
+                ],
+                React.DOM.text "Images",
+                React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) state.images)
+            ]
+
+        component this = pure {
+            state: {images: []},
+            render: render this,
+            componentDidMount: refreshImageList this
+        }
+    in React.component "ImageList" component
 
 imageViewportClass :: React.ReactClass {image :: Image}
 imageViewportClass =
@@ -66,13 +81,7 @@ imageViewportClass =
 
 appClass :: React.ReactClass {}
 appClass =
-    let refreshImageList this = launchAff_ $ do
-            maybeImages <- getImages
-            case maybeImages of
-                Left err -> log $ "error when getting images: " <> err
-                Right images -> liftEffect $ React.setState this {images: images}
-
-        setSelectedImage this image = do
+    let setSelectedImage this image = do
             state <- React.getState this
             React.setState this {selectedImage: Just image}
 
@@ -80,17 +89,14 @@ appClass =
             state <- React.getState this
             pure $ React.DOM.div' $ catMaybes [
                 Just $ React.createLeafElement imageListClass {
-                    images: state.images,
-                    refreshOnClick: (\_ -> refreshImageList this),
-                    imageSelectOnClick: (\image event -> setSelectedImage this image)
+                    imageSelectOnClick: (\image _ -> setSelectedImage this image)
                 },
                 map (\image -> React.createLeafElement imageViewportClass {image: image}) state.selectedImage
             ]
 
         component this = pure {
-            state: {images: [], selectedImage: Nothing},
-            render: render this,
-            componentDidMount: refreshImageList this
+            state: {selectedImage: Nothing},
+            render: render this
         }
     in React.component "App" component
 
