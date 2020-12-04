@@ -70,6 +70,9 @@ imageListClass =
                     React.DOM.text "refresh"
                 ],
                 React.DOM.text "Images",
+                React.DOM.button [] [
+                    React.DOM.text "upload"
+                ],
                 React.DOM.ul' $ map (mkImageListElement props.imageSelectOnClick (deleteImageFromList this)) (Set.toUnfoldable state.imagePaths)
             ]
 
