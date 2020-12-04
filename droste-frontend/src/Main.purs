@@ -25,11 +25,14 @@ import Effect.Class.Console (log)
 import DrosteApi (getImagePaths, getImage)
 import DrosteTypes (Image(..))
 
-imageListElementClass :: React.ReactClass {imagePath :: String, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
+imageListElementClass :: React.ReactClass {imagePath :: String, displayOnClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListElementClass =
     let render props = React.DOM.li' [
-            React.DOM.button [Props.className "imageButton", Props.onClick props.onClick] [
+            React.DOM.button [Props.className "imageButton", Props.onClick props.displayOnClick] [
                 React.DOM.text props.imagePath
+            ],
+            React.DOM.button [Props.className "deleteButton"] [
+                React.DOM.text "X"
             ],
             React.DOM.img [
                 Props.src $ "/static/" <> props.imagePath,
@@ -40,7 +43,10 @@ imageListElementClass =
 
 imageListClass :: React.ReactClass {imageSelectOnClick :: String -> Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
-    let mkImageListElement onClickConstructor imagePath = React.createLeafElement imageListElementClass {imagePath: imagePath, onClick: onClickConstructor imagePath}
+    let mkImageListElement onClickConstructor imagePath = React.createLeafElement imageListElementClass {
+            imagePath: imagePath,
+            displayOnClick: onClickConstructor imagePath
+        }
 
         refreshImageList this = launchAff_ $ do
             maybeImagePaths <- getImagePaths
