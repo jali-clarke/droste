@@ -22,7 +22,8 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 
-import DrosteApi (getImagePaths)
+import DrosteApi (getImagePaths, getImage)
+import DrosteTypes (Image(..))
 
 imageListElementClass :: React.ReactClass {imagePath :: String, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListElementClass =
@@ -65,20 +66,24 @@ imageListClass =
         }
     in React.component "ImageList" component
 
-imageViewportClass :: React.ReactClass {imagePath :: String}
+imageViewportClass :: React.ReactClass {image :: Image}
 imageViewportClass =
-    let render props = React.DOM.div' [
-            React.DOM.img [
-                Props.src $ "/static/" <> props.imagePath
-            ]
-        ]
+    let render props =
+            let Image {path: imagePath} = props.image
+            in React.DOM.div' [
+                    React.DOM.img [
+                        Props.src $ "/static/" <> imagePath
+                    ]
+                ]
     in React.statelessComponent render
 
 appClass :: React.ReactClass {}
 appClass =
-    let setSelectedImage this imagePath = do
-            state <- React.getState this
-            React.setState this {selectedImagePath: Just imagePath}
+    let setSelectedImage this imagePath = launchAff_ $ do
+            maybeImage <- getImage imagePath
+            case maybeImage of
+                Left err -> log $ "failed to fetch image " <> imagePath <> " : " <> err
+                Right image -> liftEffect $ React.setState this {selectedImage: Just image}
 
         render this = do
             state <- React.getState this
@@ -86,11 +91,11 @@ appClass =
                 Just $ React.createLeafElement imageListClass {
                     imageSelectOnClick: (\imagePath _ -> setSelectedImage this imagePath)
                 },
-                map (\imagePath -> React.createLeafElement imageViewportClass {imagePath: imagePath}) state.selectedImagePath
+                map (\image -> React.createLeafElement imageViewportClass {image: image}) state.selectedImage
             ]
 
         component this = pure {
-            state: {selectedImagePath: Nothing},
+            state: {selectedImage: Nothing},
             render: render this
         }
     in React.component "App" component
