@@ -56,13 +56,11 @@ imageListClass =
                 Left err -> log $ "error when getting image paths: " <> err
                 Right imagePaths -> liftEffect $ React.setState this {imagePaths: imagePaths}
 
-        deleteImageFromList this imagePath = \_ -> launchAff_ $ do
+        deleteImageFromList this imagePath event = launchAff_ $ do
             maybeResponse <- deleteImage imagePath
             case maybeResponse of
                 Left err -> log $ "error when deleting image " <> imagePath <> " : " <> err
-                Right _ -> liftEffect $ do
-                    state <- React.getState this
-                    React.setState this {imagePaths: Set.delete imagePath state.imagePaths}
+                Right _ -> liftEffect $ refreshImageList this
 
         render this = do
             props <- React.getProps this
