@@ -8,7 +8,9 @@ import Foreign.Class (class Decode, class Encode)
 import Foreign.Generic (defaultOptions, genericDecode, genericEncode)
 
 newtype Image = Image {
-    path :: String
+    path :: String,
+    width :: Int,
+    height :: Int
 }
 
 newtype Point = Point {
@@ -24,7 +26,7 @@ newtype Rectangle = Rectangle {
 }
 
 newtype DrosteRequest = DrosteRequest {
-    image :: Image,
+    path :: String,
     rectangle :: Rectangle
 }
 

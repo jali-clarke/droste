@@ -15,10 +15,11 @@ import Models.DrosteRequest
 type RedirectGet a = Verb 'GET 301 '[PlainText] (Headers '[Header "Location" String] a)
 
 type StaticApi = "static" :> RawM
-type ImagesGetAllApi = Get '[JSON] [Image]
+type ImagesGetAllApi = Get '[JSON] [String]
+type ImagesGetApi = Capture "path" String :> Get '[JSON] Image
 type ImagesPostApi = MultipartForm Mem (MultipartData Mem) :> Post '[JSON] Image
 type ImagesDeleteApi = Capture "relativePath" String :> DeleteNoContent
-type ImagesApi = "images" :> (ImagesGetAllApi :<|> ImagesPostApi :<|> ImagesDeleteApi)
+type ImagesApi = "images" :> (ImagesGetAllApi :<|> ImagesGetApi :<|> ImagesPostApi :<|> ImagesDeleteApi)
 type DrosteApi = "droste" :> ReqBody '[JSON] DrosteRequest :> Post '[JSON] Image
 type ProgrammaticApi = "api" :> (ImagesApi :<|> DrosteApi)
 type LandingApi = RedirectGet NoContent

@@ -22,33 +22,30 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 
-import DrosteApi (getImages)
-import DrosteTypes (Image(..))
+import DrosteApi (getImagePaths)
 
-imageListElementClass :: React.ReactClass {image :: Image, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
+imageListElementClass :: React.ReactClass {imagePath :: String, onClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListElementClass =
-    let render props =
-            let Image {path: imagePath} = props.image
-            in React.DOM.li' [
-                React.DOM.button [Props.className "imageButton", Props.onClick props.onClick] [
-                    React.DOM.text imagePath
-                ],
-                React.DOM.img [
-                    Props.src $ "/static/" <> imagePath,
-                    Props.className "thumbnail"
-                ]
+    let render props = React.DOM.li' [
+            React.DOM.button [Props.className "imageButton", Props.onClick props.onClick] [
+                React.DOM.text props.imagePath
+            ],
+            React.DOM.img [
+                Props.src $ "/static/" <> props.imagePath,
+                Props.className "thumbnail"
             ]
+        ]
     in React.statelessComponent render
 
-imageListClass :: React.ReactClass {imageSelectOnClick :: Image -> Event.SyntheticMouseEvent -> Effect Unit}
+imageListClass :: React.ReactClass {imageSelectOnClick :: String -> Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
-    let mkImageListElement onClickConstructor image = React.createLeafElement imageListElementClass {image: image, onClick: onClickConstructor image}
+    let mkImageListElement onClickConstructor imagePath = React.createLeafElement imageListElementClass {imagePath: imagePath, onClick: onClickConstructor imagePath}
 
         refreshImageList this = launchAff_ $ do
-            maybeImages <- getImages
-            case maybeImages of
-                Left err -> log $ "error when getting images: " <> err
-                Right images -> liftEffect $ React.setState this {images: images}
+            maybeImagePaths <- getImagePaths
+            case maybeImagePaths of
+                Left err -> log $ "error when getting image paths: " <> err
+                Right imagePaths -> liftEffect $ React.setState this {imagePaths: imagePaths}
 
         render this = do
             props <- React.getProps this
@@ -58,44 +55,42 @@ imageListClass =
                     React.DOM.text "refresh"
                 ],
                 React.DOM.text "Images",
-                React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) state.images)
+                React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) state.imagePaths)
             ]
 
         component this = pure {
-            state: {images: []},
+            state: {imagePaths: []},
             render: render this,
             componentDidMount: refreshImageList this
         }
     in React.component "ImageList" component
 
-imageViewportClass :: React.ReactClass {image :: Image}
+imageViewportClass :: React.ReactClass {imagePath :: String}
 imageViewportClass =
-    let render props =
-            let Image {path: imagePath} = props.image
-            in React.DOM.div' [
-                React.DOM.img [
-                    Props.src $ "/static/" <> imagePath
-                ]
+    let render props = React.DOM.div' [
+            React.DOM.img [
+                Props.src $ "/static/" <> props.imagePath
             ]
+        ]
     in React.statelessComponent render
 
 appClass :: React.ReactClass {}
 appClass =
-    let setSelectedImage this image = do
+    let setSelectedImage this imagePath = do
             state <- React.getState this
-            React.setState this {selectedImage: Just image}
+            React.setState this {selectedImagePath: Just imagePath}
 
         render this = do
             state <- React.getState this
             pure $ React.DOM.div' $ catMaybes [
                 Just $ React.createLeafElement imageListClass {
-                    imageSelectOnClick: (\image _ -> setSelectedImage this image)
+                    imageSelectOnClick: (\imagePath _ -> setSelectedImage this imagePath)
                 },
-                map (\image -> React.createLeafElement imageViewportClass {image: image}) state.selectedImage
+                map (\imagePath -> React.createLeafElement imageViewportClass {imagePath: imagePath}) state.selectedImagePath
             ]
 
         component this = pure {
-            state: {selectedImage: Nothing},
+            state: {selectedImagePath: Nothing},
             render: render this
         }
     in React.component "App" component

@@ -8,7 +8,9 @@ import Data.Aeson.Types
 import GHC.Generics
 
 data Image = Image {
-    path :: String
+    path :: String,
+    width :: Int,
+    height :: Int
 } deriving Generic
 
 instance FromJSON Image

@@ -40,7 +40,7 @@ saveNewImage dynamicImage = do
     newFilename <- liftIO $ fmap ((++ ".png") . U.toString) U.nextRandom
     newPath <- relativeToRoot newFilename
     liftIO $ savePngImage newPath dynamicImage
-    pure $ Image newFilename
+    pure $ Image newFilename (dynamicMap imageWidth dynamicImage) (dynamicMap imageHeight dynamicImage)
 
 staticServer :: ServerT StaticApi StaticCtx
 staticServer = staticRoot >>= RawM.serveDirectoryFileServer
@@ -49,7 +49,15 @@ imagesGetAllServer :: ServerT ImagesGetAllApi StaticCtx
 imagesGetAllServer = do
     root <- staticRoot
     pathStrings <- liftIO $ listDirectory root
-    pure $ fmap Image pathStrings
+    pure pathStrings
+
+imagesGetServer :: ServerT ImagesGetApi StaticCtx
+imagesGetServer imagePath = do
+    fullPath <- relativeToRoot imagePath
+    maybeImage <- liftIO $ readImage fullPath
+    case maybeImage of
+        Left err -> throwError $ err500 {errBody = "uploaded file is not a valid image: " <> B.fromString err}
+        Right image -> pure $ Image imagePath (dynamicMap imageWidth image) (dynamicMap imageHeight image)
 
 imagesPostServer :: ServerT ImagesPostApi StaticCtx
 imagesPostServer multipartData =
@@ -71,11 +79,11 @@ imagesDeleteServer relativePath = do
     pure NoContent
 
 imagesServer :: ServerT ImagesApi StaticCtx
-imagesServer = imagesGetAllServer :<|> imagesPostServer :<|> imagesDeleteServer
+imagesServer = imagesGetAllServer :<|> imagesGetServer :<|> imagesPostServer :<|> imagesDeleteServer
 
 drosteServer :: ServerT DrosteApi StaticCtx
 drosteServer drosteRequest =
-    let relativePath = path . image $ drosteRequest
+    let relativePath = Models.DrosteRequest.path drosteRequest
         transformRect = rectangle drosteRequest
     in do
         imagePath <- relativeToRoot relativePath
