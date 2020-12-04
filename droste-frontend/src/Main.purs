@@ -5,6 +5,7 @@ import Prelude (Unit, bind, map, pure, unit, void, ($), (<>))
 import Data.Array (catMaybes)
 import Data.Either
 import Data.Maybe (Maybe(..))
+import Data.Set as Set
 
 import Web.HTML.HTMLDocument (toNonElementParentNode) as DOM
 import Web.DOM.NonElementParentNode (getElementById) as DOM
@@ -22,16 +23,16 @@ import Effect.Aff (launchAff_)
 import Effect.Class (liftEffect)
 import Effect.Class.Console (log)
 
-import DrosteApi (getImagePaths, getImage)
+import DrosteApi (deleteImage, getImagePaths, getImage)
 import DrosteTypes (Image(..))
 
-imageListElementClass :: React.ReactClass {imagePath :: String, displayOnClick :: Event.SyntheticMouseEvent -> Effect Unit}
+imageListElementClass :: React.ReactClass {imagePath :: String, displayOnClick :: Event.SyntheticMouseEvent -> Effect Unit, deleteOnClick :: Event.SyntheticMouseEvent -> Effect Unit}
 imageListElementClass =
     let render props = React.DOM.li' [
             React.DOM.button [Props.className "imageButton", Props.onClick props.displayOnClick] [
                 React.DOM.text props.imagePath
             ],
-            React.DOM.button [Props.className "deleteButton"] [
+            React.DOM.button [Props.className "deleteButton", Props.onClick props.deleteOnClick] [
                 React.DOM.text "X"
             ],
             React.DOM.img [
@@ -43,9 +44,10 @@ imageListElementClass =
 
 imageListClass :: React.ReactClass {imageSelectOnClick :: String -> Event.SyntheticMouseEvent -> Effect Unit}
 imageListClass =
-    let mkImageListElement onClickConstructor imagePath = React.createLeafElement imageListElementClass {
+    let mkImageListElement displayOnClickConstructor deleteOnClickConstructor imagePath = React.createLeafElement imageListElementClass {
             imagePath: imagePath,
-            displayOnClick: onClickConstructor imagePath
+            displayOnClick: displayOnClickConstructor imagePath,
+            deleteOnClick: deleteOnClickConstructor imagePath
         }
 
         refreshImageList this = launchAff_ $ do
@@ -53,6 +55,14 @@ imageListClass =
             case maybeImagePaths of
                 Left err -> log $ "error when getting image paths: " <> err
                 Right imagePaths -> liftEffect $ React.setState this {imagePaths: imagePaths}
+
+        deleteImageFromList this imagePath = \_ -> launchAff_ $ do
+            maybeResponse <- deleteImage imagePath
+            case maybeResponse of
+                Left err -> log $ "error when deleting image " <> imagePath <> " : " <> err
+                Right _ -> liftEffect $ do
+                    state <- React.getState this
+                    React.setState this {imagePaths: Set.delete imagePath state.imagePaths}
 
         render this = do
             props <- React.getProps this
@@ -62,11 +72,11 @@ imageListClass =
                     React.DOM.text "refresh"
                 ],
                 React.DOM.text "Images",
-                React.DOM.ul' (map (mkImageListElement props.imageSelectOnClick) state.imagePaths)
+                React.DOM.ul' $ map (mkImageListElement props.imageSelectOnClick (deleteImageFromList this)) (Set.toUnfoldable state.imagePaths)
             ]
 
         component this = pure {
-            state: {imagePaths: []},
+            state: {imagePaths: Set.empty},
             render: render this,
             componentDidMount: refreshImageList this
         }
