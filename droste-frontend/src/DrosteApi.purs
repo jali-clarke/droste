@@ -1,8 +1,8 @@
 module DrosteApi where
 
-import Prelude (bind, map, pure, show, ($), (<>))
+import Prelude (Unit, bind, map, pure, show, unit, ($), (<>))
 
-import Affjax (get, printError) as AX
+import Affjax (delete_, get, printError) as AX
 import Affjax.ResponseFormat (string) as AX
 
 import Control.Monad.Except (runExcept)
@@ -29,3 +29,10 @@ getImage imagePath = do
         Right maybeImage -> case runExcept maybeImage of
             Left err -> Left $ show err
             Right image -> Right image
+
+deleteImage :: String -> Aff (Either String Unit)
+deleteImage imagePath = do
+    maybeResponse <- AX.delete_ ("/api/images/" <> imagePath)
+    pure $ case maybeResponse of
+        Left err -> Left $ AX.printError err
+        Right _ -> Right unit
