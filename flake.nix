@@ -24,7 +24,7 @@
         spago2nix-pkg = import spago2nix {inherit pkgs;};
 
         droste-frontend = import ./droste-frontend {inherit pkgs purs spago; spago2nix = spago2nix-pkg;};
-        cabalPackagesBuilder = import ./cabal-packages.nix {inherit pkgs;};
+        cabalPackagesBuilder = import ./cabal-packages-builder.nix {inherit pkgs;};
         droste = (pkgs.haskellPackages.callPackage "${cabalPackagesBuilder}/droste-cabal-packages.nix" {}).overrideAttrs (oldAttrs: rec {
           src = ./.;
           preBuild = ''
