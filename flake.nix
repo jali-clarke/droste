@@ -24,7 +24,9 @@
         spago2nix-pkg = import spago2nix {inherit pkgs;};
 
         droste-frontend = import ./droste-frontend {inherit pkgs purs spago;};
-        droste = (pkgs.haskellPackages.callPackage ./cabal-packages.nix {}).overrideAttrs (oldAttrs: rec {
+        cabal-packages-builder = import ./cabal-packages.nix {inherit pkgs;};
+        droste = (pkgs.haskellPackages.callPackage "${cabal-packages-builder}/droste-cabal-packages.nix" {}).overrideAttrs (oldAttrs: rec {
+          src = ./.;
           preBuild = ''
             ${if builtins.hasAttr "preBuild" oldAttrs then oldAttrs.preBuild else ""}
             cp ${droste-frontend}/index.js data/index.js
@@ -34,7 +36,6 @@
         devShell = pkgs.mkShell {
           buildInputs = [
             pkgs.cabal-install
-            pkgs.cabal2nix
             pkgs.ghc
             pkgs.zlib
 

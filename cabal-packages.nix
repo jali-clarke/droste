@@ -1,21 +1,15 @@
-{ mkDerivation, aeson, base, bytestring, directory, filepath
-, JuicyPixels, mtl, servant-multipart, servant-rawm-server
-, servant-server, stdenv, utf8-string, uuid, wai-logger, warp
-}:
-mkDerivation {
-  pname = "droste";
-  version = "0.1.0.0";
+{pkgs}:
+pkgs.stdenv.mkDerivation {
+  name = "droste-cabal-packages";
+  buildInputs = [pkgs.cabal2nix];
   src = ./.;
-  isLibrary = true;
-  isExecutable = true;
-  enableSeparateDataOutput = true;
-  libraryHaskellDepends = [
-    aeson base bytestring directory filepath JuicyPixels mtl
-    servant-multipart servant-rawm-server servant-server utf8-string
-    uuid
-  ];
-  executableHaskellDepends = [
-    base directory servant-server wai-logger warp
-  ];
-  license = stdenv.lib.licenses.mit;
+
+  buildPhase = ''
+    cabal2nix . > droste-cabal-packages.nix
+  '';
+
+  installPhase = ''
+    mkdir -p $out
+    cp droste-cabal-packages.nix $out/droste-cabal-packages.nix
+  '';
 }
