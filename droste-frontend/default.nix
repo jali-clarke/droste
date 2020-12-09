@@ -1,4 +1,4 @@
-{pkgs, purs, spago}:
+{pkgs, purs, spago, spago2nix}:
 let
   stdenv = pkgs.stdenv;
   spagoPkgs = import ./spago-packages.nix {inherit pkgs;};

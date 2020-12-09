@@ -23,9 +23,9 @@
         spago = purescript-pkgs.spago;
         spago2nix-pkg = import spago2nix {inherit pkgs;};
 
-        droste-frontend = import ./droste-frontend {inherit pkgs purs spago;};
-        cabal-packages-builder = import ./cabal-packages.nix {inherit pkgs;};
-        droste = (pkgs.haskellPackages.callPackage "${cabal-packages-builder}/droste-cabal-packages.nix" {}).overrideAttrs (oldAttrs: rec {
+        droste-frontend = import ./droste-frontend {inherit pkgs purs spago; spago2nix = spago2nix-pkg;};
+        cabalPackagesBuilder = import ./cabal-packages.nix {inherit pkgs;};
+        droste = (pkgs.haskellPackages.callPackage "${cabalPackagesBuilder}/droste-cabal-packages.nix" {}).overrideAttrs (oldAttrs: rec {
           src = ./.;
           preBuild = ''
             ${if builtins.hasAttr "preBuild" oldAttrs then oldAttrs.preBuild else ""}

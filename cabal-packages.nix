@@ -1,8 +1,8 @@
 {pkgs}:
 pkgs.stdenv.mkDerivation {
   name = "droste-cabal-packages";
-  buildInputs = [pkgs.cabal2nix];
   src = ./.;
+  buildInputs = [pkgs.cabal2nix];
 
   buildPhase = ''
     cabal2nix . > droste-cabal-packages.nix
